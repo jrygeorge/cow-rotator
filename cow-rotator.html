@@ -37,7 +37,7 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 ctx.canvas.width  = window.innerWidth;
 ctx.canvas.height = window.innerHeight;
-ctx.fillRect(offsetX-2,offsetY-2,4,4)
+
 let xAngle = 0
 let yAngle = 0
 let zAngle = 0
@@ -51,6 +51,8 @@ model = cube
 
 function drawModel(mod){
     ctx.canvas.width = ctx.canvas.width;
+    ctx.fillStyle = "red"
+    ctx.fillRect(offsetX-2,offsetY-2,4,4)
     for(let i=0;i<mod.edges.length;i++){
         
         side = mod.edges[i];
