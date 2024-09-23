@@ -27,23 +27,24 @@
 <body style="background-color:rgb(206, 206, 206); margin: 0px;">
 
 <div id="pix" style="width: 100%; height:99%; margin: 0px;">
-    <canvas id="canvas" width="5" height="5" style="border:1px solid #000000; box-shadow: 0px 0px 10px rgb(18,18,18); margin: 0px;">:(</canvas>
+    <canvas id="canvas" width="500" height="500" style="border:1px solid #000000; box-shadow: 0px 0px 10px rgb(18,18,18); margin: 0px;">:(</canvas>
 </div>
 
 <script>
 
-offsetX = window.innerWidth / 2;
-offsetY = window.innerHeight / 2;
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 ctx.canvas.width  = window.innerWidth;
 ctx.canvas.height = window.innerHeight;
+offsetX = ctx.canvas.width / 2;
+offsetY = ctx.canvas.height / 2;
 
 let xAngle = 0
 let yAngle = 0
 let zAngle = 0
-let angleStep = 3
-let scaleFactor = 2
+let angleStep = 3 // in degrees
+let scaleFactor = 50
+const lineWidth = 1
 
 cube = {points : [[100,100,100],[-100,100,100],[100,100,-100],[-100,100,-100],[100,-100,100],[-100,-100,100],[100,-100,-100],[-100,-100,-100],[0,-200,0]],
     edges : [[0,1],[1,3],[2,0],[3,2],[4,5],[5,7],[6,4],[7,6],[0,4],[1,5],[2,6],[3,7],[4,8],[5,8],[6,8],[7,8]]
@@ -68,8 +69,6 @@ cow = {
                 [85,-4,-4],[85,4,4], // buttline1
                 [85,-4,4],[85,4,-4] // buttline2
                 ], 
-
-
 
     edges : [
                 [0,1],[1,2],[2,3],[3,0], // foot1
@@ -101,8 +100,41 @@ cow = {
             ]
 }
 
+ball1 = {
+    points : [
+                [0,0,4], //+4 (TOP)
+                [0,2.646,3],[-2.2915,1.323,3],[-2.2915,-1.323,3],[0,-2.646,3],[2.2915,-1.323,3],[2.2915,1.323,3], //+3
+                [-1.732,2.99991,2],[-3.464,0,2],[-1.732,-2.99991,2],[1.732,-2.99991,2],[3.464,0,2],[1.732,2.99991,2], //+2
+                [0,3.837,1],[-3.35412,1.9365,1],[-3.35412,-1.9365,1],[0,-3.837,1],[3.35412,-1.9365,1],[3.35412,1.9365,1],//+1
+                [-2,3.4641,0],[-4,0,0],[-2,-3.4641,0],[2,-3.4641,0],[4,0,0],[2,3.4641,0], // ZERO
+                [0,3.837,-1],[-3.35412,1.9365,-1],[-3.35412,-1.9365,-1],[0,-3.837,-1],[3.35412,-1.9365,-1],[3.35412,1.9365,-1], //-1
+                [-1.732,2.99991,-2],[-3.464,0,-2],[-1.732,-2.99991,-2],[1.732,-2.99991,-2],[3.464,0,-2],[1.732,2.99991,-2], //-2
+                [0,2.646,-3],[-2.2915,1.323,-3],[-2.2915,-1.323,-3],[0,-2.646,-3],[2.2915,-1.323,-3],[2.2915,1.323,-3],//-3
+                [0,0,-4] // -4 (BOTTOM)
+                ], 
 
-model = JSON.parse(JSON.stringify(cow));
+    edges : [
+                [0,1],[0,2],[0,3],[0,4],[0,5],[0,6], // +4 to +3
+                [1,7],[7,2],[2,8],[8,3],[3,9],[9,4],[4,10],[10,5],[5,11],[11,6],[6,12],[12,1], // +3 to +2
+                [13,7],[7,14],[14,8],[8,15],[15,9],[9,16],[16,10],[10,17],[17,11],[11,18],[18,12],[12,13], // +2 to +1
+                [13,19],[19,14],[14,20],[20,15],[15,21],[21,16],[16,22],[22,17],[17,23],[23,18],[18,24],[24,13], // +1 to 0
+                [25,19],[19,26],[26,20],[20,27],[27,21],[21,28],[28,22],[22,29],[29,23],[23,30],[30,24],[24,25], // 0 to -1
+                [25,31],[31,26],[26,32],[32,27],[27,33],[33,28],[28,34],[34,29],[29,35],[35,30],[30,36],[36,25], // -1 to -2
+                [37,31],[31,38],[38,32],[32,39],[39,33],[33,40],[40,34],[34,41],[41,35],[35,42],[42,36],[36,37], // -2 to -3
+                [37,43],[38,43],[39,43],[40,43],[41,43],[42,43], //-3 to -4
+                [1,2],[2,3],[3,4],[4,5],[5,6],[6,1], // +3 ring
+                [7,8],[8,9],[9,10],[10,11],[11,12],[12,7], // +2 ring
+                [13,14],[14,15],[15,16],[16,17],[17,18],[18,13], //+1 ring
+                [19,20],[20,21],[21,22],[22,23],[23,24],[24,19], // 0 ring
+                [25,26],[26,27],[27,28],[28,29],[29,30],[30,25], // -1 ring
+                [31,32],[32,33],[33,34],[34,35],[35,36],[36,31], // -2 ring
+                [37,38],[38,39],[39,40],[40,41],[41,42],[42,37] // -3 ring
+            ]
+}
+
+
+
+model = JSON.parse(JSON.stringify(ball));
 
 function drawModel(mod){
     ctx.canvas.width = ctx.canvas.width;
@@ -118,7 +150,7 @@ function drawModel(mod){
         
         ctx.moveTo(x0+offsetX,y0+offsetY);
         ctx.lineTo(x1+offsetX,y1+offsetY);
-        ctx.lineWidth = 1;
+        ctx.lineWidth = lineWidth;
         ctx.stroke();
     }
 }
@@ -128,13 +160,12 @@ function rotateAllPoints(obj,x,y,z){
     y *= Math.PI/180;
     z *= Math.PI/180;
     for(let i=0;i<obj.points.length;i++){
-    obj.points[i] = rotateAroundX(obj.points[i],x);
-    obj.points[i] = rotateAroundY(obj.points[i],y);
-    obj.points[i] = rotateAroundZ(obj.points[i],z);
+        pointT = [[obj.points[i][0]],[obj.points[i][1]],[obj.points[i][2]]]
+        resultT = matrixMultiplication(generateRotationMatrix(x,y,z),pointT);
+        obj.points[i] = [resultT[0][0],resultT[1][0],resultT[2][0]];
     }
     return obj
 }
-
 
 function matrixMultiplication(A,B){
     if(A[0].length != B.length){throw new Error("Invalid dimensions for matrices :(")}
@@ -157,26 +188,11 @@ function matrixMultiplication(A,B){
     return result;
 }
 
-function rotateAroundZ(point,angle){
-    pointT = [[point[0]],[point[1]],[point[2]]];
-    zRot = [[Math.cos(angle),-Math.sin(angle),0],[Math.sin(angle),Math.cos(angle),0],[0,0,1]];
-    rotatedT = matrixMultiplication(zRot,pointT);
-    rotated = [rotatedT[0][0],rotatedT[1][0],rotatedT[2][0]]
-    return rotated
-}
-function rotateAroundY(point,angle){
-    pointT = [[point[0]],[point[1]],[point[2]]];
-    yRot = [[Math.cos(angle),0,Math.sin(angle)],[0,1,0],[-Math.sin(angle),0,Math.cos(angle)]];
-    rotatedT = matrixMultiplication(yRot,pointT);
-    rotated = [rotatedT[0][0],rotatedT[1][0],rotatedT[2][0]]
-    return rotated
-}
-function rotateAroundX(point,angle){
-    pointT = [[point[0]],[point[1]],[point[2]]];
-    xRot = [[1,0,0],[0,Math.cos(angle),-Math.sin(angle)],[0,Math.sin(angle),Math.cos(angle)]];
-    rotatedT = matrixMultiplication(xRot,pointT);
-    rotated = [rotatedT[0][0],rotatedT[1][0],rotatedT[2][0]]
-    return rotated
+function generateRotationMatrix(xA,yA,zA){
+    zRot = [[Math.cos(zA),-Math.sin(zA),0],[Math.sin(zA),Math.cos(zA),0],[0,0,1]];
+    yRot = [[Math.cos(yA),0,Math.sin(yA)],[0,1,0],[-Math.sin(yA),0,Math.cos(yA)]];
+    xRot = [[1,0,0],[0,Math.cos(xA),-Math.sin(xA)],[0,Math.sin(xA),Math.cos(xA)]];
+    return matrixMultiplication(zRot,matrixMultiplication(yRot,xRot))
 }
 
 window.addEventListener("deviceorientation", handleOrientation, true);
@@ -185,11 +201,14 @@ function handleOrientation(event) {
     // alpha SPINNING ON TABLE goes 0 - 360 -> 0
     // beta LIFTING TOWARDS YOUR FACE goes flat: 0 - 90 (portrait) - 180 (upside down) -> -180 - 0
     // gamma FLIPPING SIDEWAYS goes leftfacing: -90 - 0 - 90 -> -90 - 0 (upside down) - 90 -> -90 (left facing again)
+    //alpha/yaw/y
+    //beta/pitch/x
+    //gamma/roll/z
     alpha = event.alpha
     beta = event.beta
     gamma = event.gamma
-    if(beta < 180){beta = 180+180+beta;} // actually dont think this is needed coz of the mod later
-    if(gamma<0){alpha +=180;beta+=180;}
+    //if(beta < 180){beta = 180+180+beta;} // actually dont think this is needed coz of the mod later
+    //if(gamma<0){alpha +=180;beta+=180;}
 
     zAngle  = (alpha + 360)%360
     xAngle   = (beta + 360)%360 //-90 inside
@@ -205,6 +224,7 @@ document.body.addEventListener("mousemove", function (e) {
     ctx.fillRect(e.clientX-2,e.clientY-2,4,4)
 })
 */
+
 
 document.addEventListener('keydown', function(event){
     
