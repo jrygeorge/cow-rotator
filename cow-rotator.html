@@ -43,7 +43,7 @@ let yAngle = 0
 let zAngle = 0
 let angleStep = 3
 
-cube = {points : [[50,50,50],[-50,50,50],[50,50,-50],[-50,50,-50],[50,-50,50],[-50,-50,50],[50,-50,-50],[-50,-50,-50],[0,-75,0]],
+cube = {points : [[100,100,100],[-100,100,100],[100,100,-100],[-100,100,-100],[100,-100,100],[-100,-100,100],[100,-100,-100],[-100,-100,-100],[0,-200,0]],
     edges : [[0,1],[1,3],[2,0],[3,2],[4,5],[5,7],[6,4],[7,6],[0,4],[1,5],[2,6],[3,7],[4,8],[5,8],[6,8],[7,8]]
 }
 
@@ -61,7 +61,7 @@ function drawModel(mod){
         
         ctx.moveTo(x0+offsetX,y0+offsetY);
         ctx.lineTo(x1+offsetX,y1+offsetY);
-        ctx.lineWidth = 0.5;
+        ctx.lineWidth = 3;
         ctx.stroke();
     }
 }
@@ -124,12 +124,13 @@ function rotateAroundX(point,angle){
 
 window.addEventListener("deviceorientation", handleOrientation, true);
 function handleOrientation(event) {
-  var absolute = event.absolute;
-  var alpha    = event.alpha;
-  var beta     = event.beta;
-  var gamma    = event.gamma;
-  //console.log(absolute,alpha,beta,gamma);
-  // Do stuff with the new orientation data
+  //let absolute = event.absolute;
+  zAngle  = (event.alpha/2 + 360)%360
+  xAngle   = (event.beta + 360 - 90)%360 
+  yAngle   = (event.gamma/2 + 360)%360
+
+  modelCopy = JSON.parse(JSON.stringify(model));
+  drawModel(rotateAllPoints(modelCopy,xAngle,yAngle,zAngle))
 }
 
 /*
@@ -145,10 +146,10 @@ document.addEventListener('keydown', function(event){
         yAngle += {"a":angleStep,"d":-angleStep}[event.key];
     }
     if (["w","s"].includes(event.key)){
-        xAngle += {"w":angleStep,"s":-angleStep}[event.key];
+        xAngle += {"w":-angleStep,"s":angleStep}[event.key];
     }
     if (["q","e"].includes(event.key)){
-        zAngle += {"q":angleStep,"e":-angleStep}[event.key];
+        zAngle += {"q":-angleStep,"e":+angleStep}[event.key];
     }
 
     modelCopy = JSON.parse(JSON.stringify(model));
