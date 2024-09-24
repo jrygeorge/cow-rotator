@@ -14,18 +14,24 @@ function drawModel(mod){
         ctx.moveTo(x0+offsetX,y0+offsetY);
         ctx.lineTo(x1+offsetX,y1+offsetY);
         ctx.lineWidth = lineWidth;
+
         ctx.stroke();
     }
 }
 
 function rotateAllPoints(obj,x,y,z){
+    /*
     x *= Math.PI/180;
     y *= Math.PI/180;
-    z *= Math.PI/180;
+    z *= Math.PI/180;*/
+
     for(let i=0;i<obj.points.length;i++){
+        obj.points[i] = quaternionRotation(obj.points[i],y,x,z)
+        /*
         pointT = [[obj.points[i][0]],[obj.points[i][1]],[obj.points[i][2]]]
         resultT = matrixMultiplication(generateRotationMatrix(x,y,z),pointT);
-        obj.points[i] = [resultT[0][0],resultT[1][0],resultT[2][0]];
+        obj.points[i] = [resultT[0][0],resultT[1][0],resultT[2][0]];*/
+
     }
     return obj
 }
@@ -50,6 +56,40 @@ function matrixMultiplication(A,B){
     }
     return result;
 }
+
+function quaternionMultiplication(A,B){
+    if ((A.length != 4 )||(B.length != 4)){throw new Error("Invalid quaternions :(");}
+    let t0 = A[0]*B[0] - A[1]*B[1] - A[2]*B[2] - A[3]*B[3];
+    let t1 = A[0]*B[1] + A[1]*B[0] - A[2]*B[3] + A[3]*B[2];
+    let t2 = A[0]*B[2] + A[1]*B[3] + A[2]*B[0] - A[3]*B[1];
+    let t3 = A[0]*B[3] - A[1]*B[2] + A[2]*B[1] + A[3]*B[0];
+    return [t0,t1,t2,t3];
+}
+
+function quaternionInversion(A){
+    if (A.length != 4 ){throw new Error("Invalid quaternion :(");}
+    return [A[0],-A[1],-A[2],-A[3]];
+}
+
+function quaternionRotation(point,alpha,beta,gamma){
+    let uby2 = gamma * (Math.PI/180)/ 2 ;
+    let vby2 = beta * (Math.PI/180)/ 2 ;
+    let wby2 = alpha * (Math.PI/180)/ 2 ;
+
+    let q0 = Math.cos(uby2)*Math.cos(vby2)*Math.cos(wby2) + Math.sin(uby2)*Math.sin(vby2)*Math.sin(wby2)
+    let q1 = Math.sin(uby2)*Math.cos(vby2)*Math.cos(wby2) - Math.cos(uby2)*Math.sin(vby2)*Math.sin(wby2)
+    let q2 = Math.cos(uby2)*Math.sin(vby2)*Math.cos(wby2) + Math.sin(uby2)*Math.cos(vby2)*Math.sin(wby2)
+    let q3 = Math.cos(uby2)*Math.cos(vby2)*Math.sin(wby2) - Math.sin(uby2)*Math.sin(vby2)*Math.cos(wby2)
+
+    rotationQuaternion = [q0,q1,q2,q3];
+    p = [0,point[0],point[1],point[2]];
+
+    ansQ = quaternionMultiplication(quaternionMultiplication(quaternionInversion(rotationQuaternion),p),rotationQuaternion);
+
+    return [ansQ[1],ansQ[2],ansQ[3]];
+
+}
+
 
 function generateRotationMatrix(xA,yA,zA){
     zRot = [[Math.cos(zA),-Math.sin(zA),0],[Math.sin(zA),Math.cos(zA),0],[0,0,1]];
